@@ -39,8 +39,8 @@ def add_mixed_files(source_file, target_file, index_file, dataset, delimiter=" "
     :param delimiter: The delimiter that was used in index_file, such as "-" or " ".
     """
     languages = set()
-    with GFile(index_file, "r") as fp:
-        for line in tqdm(fp.readlines()):
+    with open(index_file, "r") as fp:
+        for line in tqdm(fp):
             lang1, lang2 = line.rstrip().split(delimiter)
             languages.add(lang1)
             languages.add(lang2)

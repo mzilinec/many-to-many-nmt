@@ -40,7 +40,7 @@ class TranslateManyToMany(translate.TranslateProblem):
 
     @property
     def approx_vocab_size(self):
-        return 65,536  # 2**16
+        return 65536  # 2**16
 
     def dataset_filename(self):
         return "translate"
@@ -51,7 +51,7 @@ class TranslateManyToMany(translate.TranslateProblem):
 
     @property
     def prefixes(self):
-        return [f"2<%s>" % lang for lang in CONFIG['languages']]
+        return ["2<%s>" % lang for lang in CONFIG['languages']]
 
     @property
     def inputs_prefix(self):
@@ -114,7 +114,7 @@ class TranslateManyToMany(translate.TranslateProblem):
             raise ValueError(f"The text file {filename} has an unexpected suffix: {language}. Expecting one of the language codes: {CONFIG['languages']}")
         return language
 
-    def text2text_txt_iterator(self, source_txt_path, target_txt_path, index_path=None):
+    def text2text_txt_iterator(self, source_txt_path, target_txt_path, index_path=None, bidirectional=True):
         """Yield dicts for Text2TextProblem.generate_samples from lines of files."""       
         if index_path is not None:
             # We're dealing with pre-merged files with multiple languages ...
@@ -125,15 +125,19 @@ class TranslateManyToMany(translate.TranslateProblem):
                 txt_line_iterator(target_txt_path),
                 txt_line_iterator(index_path)
             ):
-                src_lang, tgt_lang = language_pair.split("-")
+                src_lang, tgt_lang = language_pair.split(" ")
                 yield {"inputs": inputs, "targets": targets, "src_lang": src_lang, "tgt_lang": tgt_lang}
+                if bidirectional:
+                    yield {"inputs": targets, "targets": inputs, "src_lang": tgt_lang, "tgt_lang": src_lang}
         else:
             # We're dealing with a file containing only one language pair ...
             #  We only need to determine the language from the files' suffixes.
-            tgt_lang = self._determine_language_from_suffix(source_txt_path)
-            src_lang = self._determine_language_from_suffix(target_txt_path)  # FIXME: RENAME IT FINALLY!!!
+            src_lang = self._determine_language_from_suffix(source_txt_path)
+            tgt_lang = self._determine_language_from_suffix(target_txt_path)
             for inputs, targets in zip(txt_line_iterator(source_txt_path), txt_line_iterator(target_txt_path)):
                 yield {"inputs": inputs, "targets": targets, "src_lang": src_lang, "tgt_lang": tgt_lang}
+                if bidirectional:
+                    yield {"inputs": targets, "targets": inputs, "src_lang": tgt_lang, "tgt_lang": src_lang}
 
     def generate_encoded_samples(self, data_dir, tmp_dir, dataset_split):
         if dataset_split == problem.DatasetSplit.TRAIN:
