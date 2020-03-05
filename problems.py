@@ -83,22 +83,8 @@ class TranslateManyToMany(translate.TranslateProblem):
             tag = "dev"
             datatypes_to_clean = None
         
-        data_paths = [d[1] for d in datasets]  #self.check_data_files(datasets)
+        data_paths = [d[1] for d in datasets]
         return self._meta_iterator(data_paths)
-    
-    # def check_data_files(self, data_dir, datasets):
-    #     fnames = []
-    #     for dataset in datasets:
-    #         unused_url = dataset[0]
-    #         lang1_filename, lang2_filename, idx_filename = dataset[1]
-    #         lang1_filepath = os.path.join(data_dir, lang1_filename)
-    #         lang2_filepath = os.path.join(data_dir, lang2_filename)
-    #         if idx_filename is not None:
-    #             idx_filepath = os.path.join(data_dir, idx_filename)
-    #         else:
-    #             idx_filepath = None
-    #         fnames.append((lang1_filepath, lang2_filepath, idx_filepath))
-    #     return fnames
 
     def _meta_iterator(self, data_files):
         for source, target, index in data_files:
