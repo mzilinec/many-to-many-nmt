@@ -29,7 +29,7 @@ def save_data_config(training_dir, testing_dir):
 
     languages = sorted(list(set(langs1) | set(langs2)))
     config = create_data_config(training_files, testing_files, languages)
-    with open("data_config.json", "w") as fp:
+    with open(args.data_config, "w") as fp:
         json.dump(config, fp)
     
     return config
@@ -41,12 +41,12 @@ def preprocessing(args):
     t2t_problem.generate_data(args.data_dir, args.temp_dir)
 
 def _init_network(args):
-    with open("data_config.json") as fp:
+    with open(args.data_config) as fp:
         config = json.load(fp)
     CONFIG.update(config)
 
     MODEL = "transformer"
-    HPARAMS = "transformer_tpu"
+    HPARAMS = "transformer_big_tpu"
     train_steps = 1000000
     eval_steps = 10
     save_checkpoints_steps = 10000
@@ -84,7 +84,7 @@ def _init_network(args):
 
 def training(args):
     tensorflow_exp_fn = _init_network(args)
-    out = tensorflow_exp_fn.train(max_steps=300000)
+    out = tensorflow_exp_fn.train(max_steps=1000000)
     print(out)
 
 def do_eval(args):
@@ -103,6 +103,8 @@ def main(args):
 if __name__ == "__main__":
     argp = argparse.ArgumentParser()
     argp.add_argument("action", choices=['prepro', 'train', 'eval'])
+    argp.add_argument("--data-config", default="data_config.json")
+
     argp.add_argument("--data-dir", type=str, required=True)
     argp.add_argument("--model-dir", type=str, required=True)
     argp.add_argument("--temp-dir", type=str, default="/tmp")
